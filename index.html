@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loomwell — Everyday clothing</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14213d;--paper:#f3f5f7;--card:#fff;--line:#d5dae1;--accent:#2f4bff;--muted:#5b6678;--ok:#157f5b}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header{position:sticky;top:0;z-index:10;background:var(--ink);color:#fff;display:flex;align-items:center;gap:1rem;padding:.8rem clamp(1rem,4vw,3rem)}
+.logo{font-weight:800;font-size:1.5rem;letter-spacing:-.03em;margin-right:auto}
+.cart-btn{background:#fff;color:var(--ink);border:0;border-radius:999px;padding:.5rem 1rem;font-weight:600}
+.cart-btn b{background:var(--accent);color:#fff;border-radius:999px;padding:0 .5rem;margin-left:.4rem}
+.hero{padding:clamp(2.5rem,8vw,6rem) clamp(1rem,4vw,3rem);max-width:1200px;margin:auto}
+.hero h1{font-size:clamp(2.6rem,9vw,6.5rem);font-weight:800;line-height:.95;letter-spacing:-.04em;max-width:11ch}
+.hero p{margin-top:1.2rem;max-width:42ch;color:var(--muted);font-size:1.1rem}
+.hero a{display:inline-block;margin-top:1.5rem;background:var(--accent);color:#fff;padding:.8rem 1.6rem;border-radius:6px;text-decoration:none;font-weight:600}
+.bar{max-width:1200px;margin:auto;padding:0 clamp(1rem,4vw,3rem);display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.chip{border:1px solid var(--ink);background:transparent;border-radius:999px;padding:.35rem 1rem}
+.chip[aria-pressed=true]{background:var(--ink);color:#fff}
+.bar input,.bar select{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:.45rem .7rem}
+.bar .sp{margin-left:auto;display:flex;gap:.6rem;flex-wrap:wrap}
+.grid{max-width:1200px;margin:1.5rem auto 4rem;padding:0 clamp(1rem,4vw,3rem);display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.5rem}
+.item{background:var(--card);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.art{aspect-ratio:1;display:grid;place-items:center}
+.art svg{width:62%;filter:drop-shadow(0 6px 8px rgba(20,33,61,.18))}
+.info{padding:1rem;display:flex;flex-direction:column;gap:.5rem;flex:1}
+.info h3{font-size:1.05rem;font-weight:600}
+.info .meta{color:var(--muted);font-size:.9rem}
+.price{font-weight:800;font-size:1.2rem}
+.row{display:flex;gap:.5rem;margin-top:auto}
+.row select{flex:0 0 5rem;border:1px solid var(--line);border-radius:6px;padding:.4rem;background:#fff}
+.add{flex:1;border:0;background:var(--ink);color:#fff;border-radius:6px;padding:.5rem;font-weight:600}
+.add:hover{background:var(--accent)}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:3rem 0}
+.scrim{position:fixed;inset:0;background:rgba(20,33,61,.5);display:none;z-index:20}
+.scrim.on{display:block}
+aside{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:var(--card);z-index:30;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s}
+aside.on{transform:none}
+aside h2,.panel h2{padding:1rem 1.2rem;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:1.2rem}
+.x{border:0;background:none;font-size:1.5rem;line-height:1}
+.lines{flex:1;overflow:auto;padding:0 1.2rem}
+.line{display:grid;grid-template-columns:56px 1fr auto;gap:.8rem;align-items:center;padding:.9rem 0;border-bottom:1px solid var(--line)}
+.line .art{width:56px;border-radius:6px}
+.line .art svg{width:70%}
+.qty{display:inline-flex;align-items:center;gap:.5rem;margin-top:.2rem}
+.qty button{width:1.7rem;height:1.7rem;border:1px solid var(--line);background:#fff;border-radius:4px}
+.rm{border:0;background:none;color:var(--muted);text-decoration:underline;font-size:.85rem}
+.foot{padding:1.2rem;border-top:1px solid var(--line);display:grid;gap:.6rem}
+.foot .tot{display:flex;justify-content:space-between;font-weight:800;font-size:1.2rem}
+.ship{font-size:.9rem;color:var(--muted)}
+.ship i{display:block;height:6px;background:var(--line);border-radius:3px;margin-top:.3rem;overflow:hidden}
+.ship i u{display:block;height:100%;background:var(--ok);transition:width .3s}
+.cta{border:0;background:var(--accent);color:#fff;border-radius:6px;padding:.8rem;font-weight:600}
+.cta:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
+.panel{position:fixed;z-index:40;top:50%;left:50%;transform:translate(-50%,-50%);width:min(460px,92%);max-height:92%;overflow:auto;background:var(--card);border-radius:10px;display:none}
+.panel.on{display:block}
+.panel form,.panel .done{padding:1.2rem;display:grid;gap:.8rem}
+.panel label{display:grid;gap:.25rem;font-size:.9rem;font-weight:600}
+.panel input{border:1px solid var(--line);border-radius:6px;padding:.6rem}
+.toast{position:fixed;bottom:1.2rem;left:50%;transform:translate(-50%,5rem);background:var(--ink);color:#fff;padding:.6rem 1.2rem;border-radius:6px;z-index:50;transition:transform .25s}
+.toast.on{transform:translate(-50%,0)}
+footer{text-align:center;color:var(--muted);padding:2rem;border-top:1px solid var(--line);font-size:.9rem}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">Loomwell</span>
+  <button class="cart-btn" id="openCart" aria-label="Open cart">Cart <b id="count">0</b></button>
+</header>
+
+<section class="hero">
+  <h1>Clothes made to be worn daily.</h1>
+  <p>Heavyweight cotton, plain cuts, and fits that hold up wash after wash. Free shipping over $75.</p>
+  <a href="#shop">Shop the range</a>
+</section>
+
+<div class="bar" id="shop">
+  <div id="cats" class="bar" style="padding:0"></div>
+  <div class="sp">
+    <input type="search" id="q" placeholder="Search clothing" aria-label="Search clothing">
+    <select id="sort" aria-label="Sort products">
+      <option value="">Featured</option>
+      <option value="asc">Price: low to high</option>
+      <option value="desc">Price: high to low</option>
+    </select>
+  </div>
+</div>
+
+<main class="grid" id="grid"></main>
+
+<div class="scrim" id="scrim"></div>
+<aside id="cart" aria-label="Shopping cart">
+  <h2>Your cart <button class="x" id="closeCart" aria-label="Close cart">&times;</button></h2>
+  <div class="lines" id="lines"></div>
+  <div class="foot">
+    <div class="ship" id="ship"></div>
+    <div class="tot"><span>Subtotal</span><span id="sub">$0.00</span></div>
+    <button class="cta" id="checkout" disabled>Check out</button>
+  </div>
+</aside>
+
+<div class="panel" id="co" role="dialog" aria-label="Checkout">
+  <h2>Checkout <button class="x" data-close aria-label="Close checkout">&times;</button></h2>
+  <form id="form">
+    <label>Full name<input name="name" required autocomplete="name"></label>
+    <label>Email<input name="email" type="email" required autocomplete="email"></label>
+    <label>Shipping address<input name="addr" required autocomplete="street-address"></label>
+    <label>Card number (demo only, not sent anywhere)<input name="card" inputmode="numeric" pattern="[0-9 ]{12,19}" required placeholder="4242 4242 4242 4242"></label>
+    <div class="tot" style="display:flex;justify-content:space-between;font-weight:800"><span>Total</span><span id="total"></span></div>
+    <button class="cta" type="submit">Place order</button>
+  </form>
+</div>
+<div class="panel" id="ok" role="dialog" aria-label="Order confirmed">
+  <h2>Order placed <button class="x" data-close aria-label="Close">&times;</button></h2>
+  <div class="done"><p id="okmsg"></p><button class="cta" data-close>Keep shopping</button></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<footer>&copy; 2026 Loomwell. Demo store: no real payments are processed.</footer>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="tee" viewBox="0 0 100 100"><path d="M30 12 10 26l10 14 8-5v53h44V35l8 5 10-14-20-14q-20 12-40 0z"/></symbol>
+  <symbol id="long" viewBox="0 0 100 100"><path d="M32 10 8 30l6 40 12-2 2-28v50h44V40l2 28 12 2 6-40-24-20q-18 12-36 0z"/></symbol>
+  <symbol id="pants" viewBox="0 0 100 100"><path d="M30 10h40l6 80H54L50 42 46 90H24z"/></symbol>
+</svg>
+
+<script>
+const CUR = '$', FREE_SHIP = 75;
+const P = [
+  {id:1,name:'Heavyweight tee',cat:'Tops',shape:'tee',color:'#e8ecf2',bg:'#c9d3e6',price:28,note:'240 gsm cotton'},
+  {id:2,name:'Pocket tee',cat:'Tops',shape:'tee',color:'#2f4bff',bg:'#dfe4ff',price:32,note:'Garment dyed'},
+  {id:3,name:'Ribbed long sleeve',cat:'Tops',shape:'long',color:'#1f6f5c',bg:'#cfe8df',price:44,note:'Cotton rib knit'},
+  {id:4,name:'Oversized hoodie',cat:'Layers',shape:'long',color:'#14213d',bg:'#d3d9e6',price:79,note:'Brushed fleece'},
+  {id:5,name:'Zip fleece',cat:'Layers',shape:'long',color:'#e0a42b',bg:'#f6e6bd',price:92,note:'Recycled polyester'},
+  {id:6,name:'Work jacket',cat:'Layers',shape:'long',color:'#7a4b2a',bg:'#e6d3c3',price:128,note:'Waxed canvas'},
+  {id:7,name:'Straight chinos',cat:'Bottoms',shape:'pants',color:'#a79b82',bg:'#e8e3d6',price:68,note:'Stretch twill'},
+  {id:8,name:'Wide-leg denim',cat:'Bottoms',shape:'pants',color:'#3b5b8c',bg:'#d2dcec',price:84,note:'12 oz selvedge'},
+  {id:9,name:'Fleece joggers',cat:'Bottoms',shape:'pants',color:'#5b6678',bg:'#dadfe7',price:58,note:'Tapered fit'},
+  {id:10,name:'Linen shirt',cat:'Tops',shape:'long',color:'#d9604a',bg:'#f5d6cf',price:62,note:'Stonewashed linen'},
+  {id:11,name:'Cargo pants',cat:'Bottoms',shape:'pants',color:'#4a5a3b',bg:'#d9e0cf',price:88,note:'Ripstop cotton'},
+  {id:12,name:'Quilted vest',cat:'Layers',shape:'tee',color:'#14213d',bg:'#e0e4ec',price:74,note:'Light insulation'}
+];
+const SIZES = ['XS','S','M','L','XL'];
+const $ = id => document.getElementById(id);
+const money = n => CUR + n.toFixed(2);
+let cat = 'All', cart = [];
+try { cart = JSON.parse(localStorage.getItem('loomwell-cart')) || []; } catch(e) { cart = []; }
+const save = () => { try { localStorage.setItem('loomwell-cart', JSON.stringify(cart)); } catch(e) {} };
+const art = p => `<div class="art" style="background:${p.bg}"><svg fill="${p.color}" stroke="#14213d" stroke-width="1.2" stroke-linejoin="round"><use href="#${p.shape}"/></svg></div>`;
+
+function renderCats(){
+  const cats = ['All', ...new Set(P.map(p => p.cat))];
+  $('cats').innerHTML = cats.map(c => `<button class="chip" aria-pressed="${c===cat}" data-cat="${c}">${c}</button>`).join('');
+}
+function renderGrid(){
+  const q = $('q').value.trim().toLowerCase(), s = $('sort').value;
+  let list = P.filter(p => (cat==='All'||p.cat===cat) && (p.name+p.note).toLowerCase().includes(q));
+  if (s) list.sort((a,b) => s==='asc' ? a.price-b.price : b.price-a.price);
+  $('grid').innerHTML = list.length ? list.map(p => `
+    <article class="item">${art(p)}
+      <div class="info"><h3>${p.name}</h3><span class="meta">${p.note}</span><span class="price">${money(p.price)}</span>
+        <div class="row">
+          <select aria-label="Size for ${p.name}" id="sz${p.id}">${SIZES.map(z => `<option${z==='M'?' selected':''}>${z}</option>`).join('')}</select>
+          <button class="add" data-add="${p.id}">Add to cart</button>
+        </div></div></article>`).join('') : '<p class="empty">No items match. Try a different search or category.</p>';
+}
+const subtotal = () => cart.reduce((t,l) => t + P.find(p => p.id===l.id).price * l.qty, 0);
+function renderCart(){
+  const n = cart.reduce((t,l) => t + l.qty, 0), sub = subtotal();
+  $('count').textContent = n;
+  $('lines').innerHTML = cart.length ? cart.map((l,i) => { const p = P.find(x => x.id===l.id); return `
+    <div class="line">${art(p)}
+      <div><strong>${p.name}</strong><div class="meta">Size ${l.size} &middot; ${money(p.price)}</div>
+        <div class="qty"><button data-dec="${i}" aria-label="Decrease quantity">&minus;</button><span>${l.qty}</span><button data-inc="${i}" aria-label="Increase quantity">+</button></div></div>
+      <div style="text-align:right"><div class="price" style="font-size:1rem">${money(p.price*l.qty)}</div><button class="rm" data-rm="${i}">Remove</button></div>
+    </div>`; }).join('') : '<p class="empty">Your cart is empty. Add something from the shop.</p>';
+  $('sub').textContent = money(sub);
+  const left = FREE_SHIP - sub;
+  $('ship').innerHTML = (left > 0 ? `Add ${money(left)} more for free shipping` : 'You get free shipping') + `<i><u style="width:${Math.min(100, sub/FREE_SHIP*100)}%"></u></i>`;
+  $('checkout').disabled = !cart.length;
+  save();
+}
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('on'), 1800); }
+function openPanel(id){ $('scrim').classList.add('on'); $(id).classList.add('on'); }
+function closeAll(){ ['cart','co','ok'].forEach(i => $(i).classList.remove('on')); $('scrim').classList.remove('on'); }
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t) return;
+  const d = t.dataset;
+  if (d.cat) { cat = d.cat; renderCats(); renderGrid(); }
+  if (d.add) {
+    const id = +d.add, size = $('sz'+id).value, ex = cart.find(l => l.id===id && l.size===size);
+    ex ? ex.qty++ : cart.push({id, size, qty:1});
+    renderCart(); toast('Added to cart');
+  }
+  if (d.inc) { cart[d.inc].qty++; renderCart(); }
+  if (d.dec) { if (--cart[d.dec].qty < 1) cart.splice(d.dec,1); renderCart(); }
+  if (d.rm) { cart.splice(d.rm,1); renderCart(); }
+  if (t.id==='openCart') openPanel('cart');
+  if (t.id==='closeCart' || 'close' in d) closeAll();
+  if (t.id==='checkout') { $('cart').classList.remove('on'); $('total').textContent = money(subtotal() + (subtotal() >= FREE_SHIP ? 0 : 6)) + (subtotal() >= FREE_SHIP ? '' : ' (incl. $6 shipping)'); $('co').classList.add('on'); }
+});
+$('scrim').addEventListener('click', closeAll);
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeAll(); });
+$('q').addEventListener('input', renderGrid);
+$('sort').addEventListener('change', renderGrid);
+$('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = new FormData(e.target).get('name'), no = 'LW-' + Math.floor(100000 + Math.random()*900000);
+  $('okmsg').textContent = `Thanks, ${name}. Order ${no} is confirmed. A receipt is on its way to your email.`;
+  cart = []; renderCart(); e.target.reset();
+  $('co').classList.remove('on'); $('ok').classList.add('on');
+});
+renderCats(); renderGrid(); renderCart();
+</script>
+</body>
+</html>
